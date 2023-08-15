@@ -27,10 +27,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_queryset(self):
-        recipe = Recipe.objects.prefetch_related(
+        return Recipe.objects.prefetch_related(
             'amounts__ingredient', 'tags'
         ).all()
-        return recipe
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -51,9 +50,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @staticmethod
     def delete_method_for_actions(request, pk, model):
         user = request.user
-        recipe = get_object_or_404(Recipe, id=pk)
-        model_obj = get_object_or_404(model, user=user, recipe=recipe)
-        model_obj.delete()
+        instance = get_object_or_404(model, user=user, id=pk)
+        instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["POST"],

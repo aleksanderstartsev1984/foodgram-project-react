@@ -11,7 +11,7 @@ User = get_user_model()
 
 class RecipeIngredientsInline(admin.TabularInline):
     model = IngredientRecipe
-    extra = 1
+    extra = 0
 
 
 @admin.register(Recipe)
@@ -19,7 +19,7 @@ class RecipeAdmin(admin.ModelAdmin):
     """Модель Recipe для представления в панели администратора."""
     list_display = ('name', 'author', 'get_tags')
     empty_value_display = '-пусто-'
-    list_filter = ('name', 'author', 'tags')
+    list_filter = ('name', 'author__email', 'tags')
     inlines = (RecipeIngredientsInline, )
 
 

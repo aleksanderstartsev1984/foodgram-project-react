@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.core.validators import MinValueValidator
@@ -7,27 +8,26 @@ User = get_user_model()
 
 class Tag(models.Model):
     """Модель тега."""
-    name = models.CharField('Название', max_length=200)
+    name = models.CharField('Название', max_length=settings.CHAR_FIELD_LENGTH)
     slug = models.SlugField('Краткое название(англ)',
                             unique=True,
-                            max_length=200)
-    color = models.CharField('Цвет(HEX-CODE)', max_length=7)
-
-    def __str__(self):
-        return self.name
+                            max_length=settings.CHAR_FIELD_LENGTH)
+    color = models.CharField('Цвет(HEX-CODE)',
+                             max_length=settings.HEX_CODE_LENGTH)
 
     class Meta:
         verbose_name = 'Тэг'
         verbose_name_plural = 'Теги'
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     """Модель ингредиента."""
-    name = models.CharField('Название', max_length=200)
-    measurement_unit = models.CharField('Единицы измерения', max_length=200)
-
-    def __str__(self):
-        return self.name
+    name = models.CharField('Название', max_length=settings.CHAR_FIELD_LENGTH)
+    measurement_unit = models.CharField('Единицы измерения',
+                                        max_length=settings.CHAR_FIELD_LENGTH)
 
     class Meta:
         ordering = ['name']
@@ -38,6 +38,9 @@ class Ingredient(models.Model):
                                     name='unique ingredient')
         ]
 
+    def __str__(self):
+        return self.name
+
 
 class Recipe(models.Model):
     """Модель рецепта."""
@@ -46,15 +49,17 @@ class Recipe(models.Model):
                                related_name='author_recipies',
                                on_delete=models.CASCADE)
     name = models.CharField('Название',
-                            max_length=200)
+                            max_length=settings.CHAR_FIELD_LENGTH)
     image = models.ImageField('Изображение',
-                              upload_to='images/',
+                              upload_to=settings.PATH_IMAGE,
                               null=True,
-                              default='recipe_default.png')
+                              default=settings.DEFAULT_IMAGE)
     text = models.TextField('Текст рецепта',
-                            max_length=5000)
+                            max_length=settings.TEXT_LENGTH)
     cooking_time = models.IntegerField('Время приготовления(минуты)',
-                                       validators=[MinValueValidator(1)])
+                                       validators=[MinValueValidator(
+                                           settings.MIN_VALUE_INTEGER
+                                       )])
     pub_date = models.TimeField('Дата пупликации',
                                 auto_now_add=True)
     tags = models.ManyToManyField(Tag,
@@ -96,7 +101,13 @@ class IngredientRecipe(models.Model):
                                related_name='amounts',
                                null=True)
     amount = models.IntegerField('Количество',
-                                 validators=[MinValueValidator(1)])
+                                 validators=[MinValueValidator(
+                                     settings.MIN_VALUE_INTEGER
+                                 )])
+
+    class Meta:
+        verbose_name = 'Ингредиент рецепта'
+        verbose_name_plural = 'Ингредиенты рецептов'
 
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
@@ -129,9 +140,6 @@ class Favorite(models.Model):
                                verbose_name='Рецепт',
                                related_name='favorites')
 
-    def __str__(self):
-        return self.recipe.name
-
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
@@ -139,3 +147,6 @@ class Favorite(models.Model):
             models.UniqueConstraint(fields=['user', 'recipe'],
                                     name='unique favorite')
         ]
+
+    def __str__(self):
+        return self.recipe.name

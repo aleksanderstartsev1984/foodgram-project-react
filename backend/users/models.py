@@ -49,18 +49,18 @@ class CustomUserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         'Имя пользователя',
-        max_length=150,
+        max_length=settings.MAX_LENTH_NAME,
         unique=True,
         validators=[no_bad_symbols_validator],
     )
     email = models.EmailField(
         'Электронная почта',
-        max_length=254,
+        max_length=settings.MAX_LENTH_EMAIL,
         unique=True,
     )
     first_name = models.CharField(
         'Имя',
-        max_length=150,
+        max_length=settings.MAX_LENTH_NAME,
         validators=[
             MinLengthValidator(
                 settings.MIN_LENTH_NAME,
@@ -73,7 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     last_name = models.CharField(
         'Фамилия',
-        max_length=150,
+        max_length=settings.MAX_LENTH_NAME,
         validators=[
             MinLengthValidator(
                 settings.MIN_LENTH_NAME,
@@ -93,6 +93,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('email',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'], name='unique_user_mail'),
+            models.CheckConstraint(
+                check=~models.Q(username__iexact='me'),
+                name='username_not_me'
+            )
+        ]
+
     def has_perm(self, perm, obj=None):
         return self.is_superuser
 
@@ -107,19 +120,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-    class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ('id',)
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'], name='unique_user_mail'),
-            models.CheckConstraint(
-                check=~models.Q(username__iexact='me'),
-                name='username_not_me'
-            )
-        ]
 
 
 class Follow(models.Model):
@@ -145,3 +145,6 @@ class Follow(models.Model):
                 name='unique follow',
             )
         ]
+
+    def __str__(self):
+        return f'{self.user} ---> {self.author}'

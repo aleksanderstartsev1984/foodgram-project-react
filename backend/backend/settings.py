@@ -121,6 +121,15 @@ REST_FRAMEWORK = {
 
 }
 
+# constants for models
+
+HEX_CODE_LENGTH = 7
+TEXT_LENGTH = 5000
+CHAR_FIELD_LENGTH = 200
+PATH_IMAGE = 'images/'
+DEFAULT_IMAGE = 'recipe_default.png'
+MIN_VALUE_INTEGER = 1
+
 # djoser settings
 
 DJOSER = {
@@ -143,3 +152,5 @@ DJOSER = {
 NO_INVALID_SYMBOLS_USERNAME = r"[^\w.@+-]"
 AUTH_USER_MODEL = 'users.User'
 MIN_LENTH_NAME = 2
+MAX_LENTH_NAME = 150
+MAX_LENTH_EMAIL = 254
