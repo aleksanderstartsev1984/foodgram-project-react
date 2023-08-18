@@ -9,6 +9,7 @@ User = get_user_model()
 
 
 class RecipeIngredientsInline(admin.TabularInline):
+    """Добавление ингредиента для рецепта в панели администратора."""
     model = IngredientRecipe
     extra = 0
 
