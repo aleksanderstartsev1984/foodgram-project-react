@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-from django.contrib.auth.admin import UserAdmin
 
 from foodgram.models import (Ingredient, Recipe, Tag, IngredientRecipe,
                              Favorite, ShoppingCart)
@@ -17,23 +16,20 @@ class RecipeIngredientsInline(admin.TabularInline):
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
     """Модель Recipe для представления в панели администратора."""
-    list_display = ('name', 'author', 'get_tags')
+    list_display = ('name', 'author', 'get_tags', 'count_in_is_favorite')
     empty_value_display = '-пусто-'
-    list_filter = ('name', 'author__email', 'tags')
+    list_filter = ('tags', )
     inlines = (RecipeIngredientsInline, )
+
+    def count_in_is_favorite(self, obj):
+        return obj.favorites.count()
 
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
     """Модель Ingredient для представления в панели администратора."""
     list_display = ('name', 'measurement_unit')
-    list_filter = ('name',)
-
-
-@admin.register(User)
-class UserAdmin(UserAdmin):
-    """Модель User для представления в панели администратора."""
-    list_filter = ('email', 'username')
+    list_filter = ('measurement_unit',)
 
 
 @admin.register(ShoppingCart)
@@ -50,5 +46,6 @@ class FavoriteAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+admin.site.register(User)
 admin.site.register(Tag)
 admin.site.register(Follow)
