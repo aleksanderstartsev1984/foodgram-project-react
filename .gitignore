@@ -134,7 +134,8 @@ dmypy.json
 # my files
 save.sh
 test8.py
-test8.txt
+file_deployment.txt
+file_deployment_old.txt
 new_db.sh
 models2.py
 import_csv0.py

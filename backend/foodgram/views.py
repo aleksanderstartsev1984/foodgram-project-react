@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -24,6 +25,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     """Представление модели Recipe."""
     permission_classes = (IsAuthorOrReadOnly,)
     pagination_class = CustomPageNumberPagination
+    filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
 
     def get_queryset(self):
@@ -50,7 +52,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @staticmethod
     def delete_method_for_actions(request, pk, model):
         user = request.user
-        instance = get_object_or_404(model, user=user, id=pk)
+        recipe = get_object_or_404(Recipe, id=pk)
+        instance = get_object_or_404(model, user=user, recipe=recipe)
         instance.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -76,7 +79,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.delete_method_for_actions(
             request=request, pk=pk, model=ShoppingCart)
 
-    @action(detail=False, methods=['GET'],  # 'get'
+    @action(detail=False, methods=['GET'],
             permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
         ingredients = IngredientRecipe.objects.filter(
@@ -127,3 +130,4 @@ class TagViewSet(viewsets.ModelViewSet):
     """Представление модели Tag."""
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
